@@ -2,6 +2,7 @@ import React,{useState} from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import './Update.css'
 import axios from 'axios'
+import { useForm } from "react-hook-form"
 import { Select } from '@mui/material'
 
 
@@ -16,7 +17,7 @@ export default function Create() {
         id_number:"",
         gender:""
     })
-    const [error, setError] = useState(false)
+    const [error, setError] = useState(true)
 
     const validatePan=(panVal)=>{
         // console.log(panVal)
@@ -25,13 +26,13 @@ export default function Create() {
         if(regpan.test(panVal)){
         // valid pan card number
             console.log("Ayush")
-            setError(false)
+            setError(true)
             return true;
         } else {
             console.log("No AYush")
-            setError(true)
+            setError(false)
         // invalid pan card number
-            
+        button.removeAttribute('disabled');
             return false;
         }
     }
@@ -43,17 +44,19 @@ export default function Create() {
         if(regpan.test(AadharVal)){
         // valid Aadhar card number
             console.log("Ayush")
-            setError(false)
+            setError(true)
             return true;
         } else {
             console.log("No AYush")
-            setError(true)
+            setError(false)
         // invalid Aadhar card number
-            
+        button.removeAttribute('disabled');
             return false;
         }
         
     }
+
+
 
     const{first_name,last_name,dob,id_type,id_number,gender}=user
     var flag = 0;
@@ -73,24 +76,52 @@ export default function Create() {
     // const onInputChangee=(e)=>{
     //     [e.target.name]
     // }
-    console.log(user);
-    console.log(error)
+    // console.log(user);
+    console.log('naya',error)
 
 
     const onSubmit=async(e)=>{
         if(error){
             console.log("Errrorrrrrrrr!")
+            return false;
         }else{
         e.preventDefault();
         await axios.post("http://localhost:8080/api/customer/putCustomer",user)
+        return true;
         }
         navigate("/")
     };
+    
+    // const form = document.getElementById('form');
+    const button = document.getElementsByClassName('.btn1');
+    
+
+
+
+
+
+
+
+
+
+
+
+
+    // form.addEventListener('keyup', (e) => {
+    //     e.preventDefault();
+    //     validatePan();
+    //     validateAadhar();
+    //   });
+    // if(error){
+    //  button.setAttribute('disabled', '')
+    // }else{
+    //  button.removeAttribute('disabled')
+    // }
   return (
     <div>
         <h2 className='text-center m-4'>Create User</h2>
         <div className='container'>
-            <form onSubmit={(e)=>onSubmit(e)}>
+            <form id= "form" onSubmit={(e)=>onSubmit(e)}>
             <div className='div1'>
                 <div className='mb-3'>
                     <label htmlFor='FName' className='form-label'>First Name</label>
@@ -158,7 +189,7 @@ export default function Create() {
                     </select>
                 </div>
             </div>
-            <button type="text" className='btn1'>Submit</button>
+            <button type="submit"  className='btn1'>Submit</button>
             <Link  className='btn2' to="/">Cancel</Link>
             </form>
         </div>
