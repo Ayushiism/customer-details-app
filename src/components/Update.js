@@ -14,14 +14,115 @@ export default function Update() {
         last_name:"",
         dob:"",
         id_type:"",
-        in_number:"",
+        id_number:"",
         gender:""
     })
     const {customer_id} = useParams();
+    const [error, setError] = useState("disabled");
 
+ 
+
+  const validatePan = (panVal) => {
+
+    var regpan = /^([a-zA-Z]){5}([0-9]){4}([a-zA-Z]){1}?$/;
+
+    if (regpan.test(panVal)) {
+
+      // valid pan card number
+
+      console.log("Ayush pan");
+
+      return true;
+
+    } else {
+
+      console.log("No pan AYush");
+
+      return false;
+
+    }
+
+  };
+
+ 
+
+  const validateAadhar = (AadharVal) => {
+
+    var regpan =
+
+      /^([0-9]{4}[0-9]{4}[0-9]{4}$)|([0-9]{4}\s[0-9]{4}\s[0-9]{4}$)|([0-9]{4}-[0-9]{4}-[0-9]{4}$)/;
+
+ 
+
+    if (regpan.test(AadharVal)) {
+
+      // valid Aadhar card number
+
+      console.log("Ayush");
+
+      return true;
+
+    } else {
+
+      console.log("No AYush");
+
+      return false;
+
+    }
+
+  };
+
+ 
+
+    var val = "";
+    
     const{first_name,last_name,dob,id_type,id_number,gender}=user
 
     const onInputChange=(e)=>{
+        // let flag = 0;
+        // if(e.target.name == 'id_type'){
+        //    flag = 1;
+        // }
+        // if(flag == 1 ){
+        //     val = user.id_number;
+        //     console.log(val)
+        //     user.id_number=""
+        //     // setUser((user.id_number) => "")
+        // }
+        
+        if (e.target.name == "id_number" && user.id_type == "Pan Card") {
+
+            var panVal = e.target.value;
+
+            //we have to set the error whatever we have get
+
+            if (!validatePan(panVal)) {
+
+            setError("disabled");
+            document.getElementById("message").innerHTML="* Invalid Pan no."
+
+            }else{
+            document.getElementById("message").innerHTML=""
+            setError("");
+            }
+
+        } else if (e.target.name == "id_number" && user.id_type == "Aadhar") {
+
+            var AadharVal = e.target.value;
+
+            if (!validateAadhar(AadharVal)) {
+
+            setError("disabled");
+            document.getElementById("message").innerHTML="* Invalid Aadhar no."
+
+            } else{
+            document.getElementById("message").innerHTML=""        
+            setError("");
+            } 
+
+        }
+
+       
         setUser({...user, [e.target.name]:e.target.value})
     }
 
@@ -29,16 +130,28 @@ export default function Update() {
         loadUser()
     },[])
 
-    // // // console.log("Ayus");  
     const onSubmit=async(e)=>{
         e.preventDefault();
-        console.log(customer_id)
+
+        if (error == "disabled") {
+
+        console.log("Errrorrrrrrrr!");
+            
+        document.getElementById("message1").innerHTML=" * Invalid Deatails"
+
+        return false;
+
+        } else {
+
+        document.getElementById("message1").innerHTML=""
         await axios.put(`http://localhost:8080/api/customer/updateByID/${customer_id}`,user)
+        return true;
+        }
         navigate("/")
     };
 
     const loadUser = async()=>{
-        console.log(customer_id);
+        // console.log(customer_id);
         const result= await axios.get(`http://localhost:8080/api/customer/getByID/${customer_id}`)
         // console.log(result.data)
         setUser(result.data)
@@ -56,8 +169,8 @@ export default function Update() {
                         className='form-control'
                         placeholder='Enter your Name'
                         name='first_name'
-                        value={first_name}
-                        onChange={(e)=>onInputChange(e)}
+                        value={user.first_name}
+                        onChange={(e)=>onInputChange(e)} required
                     ></input>
                 </div>
                 <div className='mb-3'>
@@ -66,8 +179,8 @@ export default function Update() {
                         className='form-control'
                         placeholder='Enter your Last Name'
                         name='last_name'
-                        value={last_name}
-                        onChange={(e)=>onInputChange(e)}
+                        value={user.last_name}
+                        onChange={(e)=>onInputChange(e)} required
                     ></input>
                 </div>
                 <div className='mb-3'>
@@ -76,20 +189,20 @@ export default function Update() {
                         className='form-control'
                         placeholder='Enter your D.O.B'
                         name='dob'
-                        value={dob}
-                        onChange={(e)=>onInputChange(e)}
+                        value={user.dob}
+                        onChange={(e)=>onInputChange(e)} required
                     ></input>
                 </div>
             </div>
             <div className='div1'>
                 <div className='mb-3'>
                     <label htmlFor='idtype' className='form-label'>ID-Type</label><br/>
-                    <select
-                    value={user.id_type}
+                    <select    name='id_type' onChange={(e)=>onInputChange(e)}
+                    value={user.id_type} required
                      >   
                     <option selected disabled value="someOption">select Card Type</option>
-                    <option value="otherOption">Aadhar</option>
-                    <option value="otherOption">PAN Card</option>
+                    <option value="Aadhar">Aadhar</option>
+                    <option value="Pan Card">PAN Card</option>
                     </select>
                     
                 </div>
@@ -98,16 +211,17 @@ export default function Update() {
                     <input type={'idNo'}
                         className='form-control'
                         placeholder='Enter your I.D Number' 
-                        name='id'
-                        value={id_number}
-                        onChange={(e)=>onInputChange(e)}
+                        name='id_number'
+                        value={user.id_number}
+                        onChange={(e)=>onInputChange(e)} required
                         ></input>
-                </div>
+                </div><br></br>
+                <span id="message"></span>
                 <div className='mb-3'>
 
                     <label htmlFor='FName' className='form-label'>Gender</label><br/>
-                    <select
-                    value={user.gender}
+                    <select onChange={(e)=>onInputChange(e)}
+                    value={user.gender} required
                     >
                     <option selected disabled value="someOption">Select Gender</option>
                     <option value="otherOption">Male</option>
@@ -117,7 +231,8 @@ export default function Update() {
                 </div>
             </div>
             <div className='btns'>
-            <button type='submit' className='btn1'>Submit</button>
+                <span id='message1'></span><br></br>
+            <button type='submit' className='btn1' error>Submit</button>
             <Link  className='btn2' to="/">Cancel</Link>
             </div>
             </form>
