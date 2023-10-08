@@ -16,72 +16,109 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import './View.css'
 export default function View() {
     
-    const [users,setUsers] = useState([]);
-    const [page, setPage] = useState(1);
-    const [loading, setLoading] = useState(true);
-
-    // const {customer_id}=useParams()
-    // useEffect (() => {
-    //     loadUsers()
-    // },[]);
-
-    // const fetchData = async()=>{
-    //     const result = await axios.get("http://localhost:8080/api/customer/getCustomersByPage?pageNumber=1&pageSize=5");
-    //     setUsers(result.data);
-    //     setTimeout(function(){
-    //       console.log("Executed after 1 second");
-    //   }, 1000);
-    // }
-
-    useEffect(() => {
-        loadUsers();
-      }, [page])
-
-    const loadUsers = async()=>{
-        const result = await axios.get("http://localhost:8080/api/customer/getCustomersByPage?pageNumber=0&pageSize=5");
-        setUsers(result.data);
-        console.log(result.data);
-    };
-    
-    const handelInfiniteScroll = async () => {
-        // console.log("scrollHeight" + document.documentElement.scrollHeight);
-        // console.log("innerHeight" + window.innerHeight);
-        // console.log("scrollTop" + document.documentElement.scrollTop);
-        try {
-          if (
-            window.innerHeight + document.documentElement.scrollTop + 1 >=
-            document.documentElement.scrollHeight
-          ) {
-            setLoading(true);
-            setPage((prev) => prev + 1);
-          }
-        } catch (error) {
-          console.log(error);
-        }
-      };
-
-      useEffect(() => {
-        window.addEventListener("scroll", handelInfiniteScroll);
-        return () => window.removeEventListener("scroll", handelInfiniteScroll);
-      }, []);
-    
 
     const deleteUser=async (customer_id)=>{
         await axios.delete(`http://localhost:8080/api/customer/deleteByID/${customer_id}`);
-        loadUsers();
+        // loadUsers();
+        fetchData();
     }
+
+    const [rows, setRows] = useState([]);
+
+    const [isLoading, setIsLoading] = useState(true);
+
+    const[page, setPage] = useState(0);
+
+    const [tableLength, setTableLength] = useState(0)
+
+    const [isLast, setIsLast] = useState(true)
+
+ 
+
+ 
+
+  useEffect(() => {
+
+   
+
+    axios.get("http://localhost:8080/api/customer/" + "allcustomers/" + page).then(
+
+      (response)=>{
+
+        console.log(response.data)
+
+        setRows(response.data.content)
+
+        setTableLength(response.data.totalElements)
+
+        setIsLoading(false)
+
+        console.log(rows)
+
+        setIsLast(response.data.last);
+
+        console.log("isLast: " + response.data.last);
+
+      }
+
+    ).catch(e => {
+
+      setRows([]);
+
+    })
+
+  }, [])
+
+ 
+
+  const fetchData = ()=>{
+
+
+    console.log("fetch data pagr no.: " + page)
+
+    axios.get("http://localhost:8080/api/customer/" + "allcustomers/" + (page + 1)).then(
+
+      (response)=>{
+
+        console.log(response.data)
+
+        setRows(rows.concat(response.data.content))
+
+        setTableLength(response.data.totalElements)
+
+        // setIsLoading(false)
+
+        setPage(page+1);
+
+        console.log(rows)
+
+        setIsLast(response.data.last);
+
+        console.log("isLast: " + response.data.last);
+
+        console.log("fetch data after api call pagr no.: " + page)
+
+      }
+
+    ).catch(e => {
+
+      setRows([]);
+
+    })
+
+  }
   return (
     <div>
         <TableContainer
             id="scrollable" component={Paper} sx={{ maxHeight: 370}}
             >
-            {/* <InfiniteScroll
-                dataLength={users.length} //This is important field to render the next data
+            <InfiniteScroll
+                dataLength={rows.length} //This is important field to render the next data
                 next={fetchData}
-                hasMore={true}
-                loader={ <p>Loading more data...</p>}
+                hasMore={!isLast}
+                loader={<p>Loading more data...</p>}
                 scrollableTarget="scrollable"
-            > */}
+            >
 
             <Table stickyHeader sx={{ minWidth: 5 }} aria-label="demo table" className='table' >
                 <TableHead>
@@ -98,7 +135,7 @@ export default function View() {
                 {/* <TableRow> */}
                     
                         {
-                          users && users.map((user,index)=>(
+                          rows && rows.map((user,index)=>(
                                 // console.log(user)
                             <TableRow>
                                 <TableCell>
@@ -116,9 +153,9 @@ export default function View() {
                         }
                 </TableBody>
             </Table>
-            {/* </InfiniteScroll> */}
+            </InfiniteScroll>
         </TableContainer>
-        <Link to="/Create/">Create</Link>
+        <Link  to="/Create/">Create</Link>
     </div>
   )
 }

@@ -111,11 +111,12 @@ export default function Update() {
             var AadharVal = e.target.value;
 
             if (!validateAadhar(AadharVal)) {
-
+                console.log("xyz")
             setError("disabled");
             document.getElementById("message").innerHTML="* Invalid Aadhar no."
 
             } else{
+                console.log("zyx")
             document.getElementById("message").innerHTML=""        
             setError("");
             } 
